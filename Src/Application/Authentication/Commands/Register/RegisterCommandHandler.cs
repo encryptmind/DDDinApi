@@ -1,0 +1,67 @@
+﻿// <copyright file="RegisterCommandHandler.cs" company="Encrypted Mind">
+// Copyright © Encrypted Mind
+// </copyright>
+
+namespace Application.Authentication.Commands.Register
+{
+    using System.Threading.Tasks;
+
+    using Application.Common.Interfaces.Authentication;
+    using Application.Common.Interfaces.Persistence;
+    using Application.Common.Services;
+    using Application.Services.Authentication.Common;
+
+    using Domain.Common.Errors;
+    using Domain.User;
+
+    using ErrorOr;
+
+    using MediatR;
+
+    public class RegisterCommandHandler :
+        IRequestHandler<RegisterCommand, ErrorOr<AuthenticationResult>>
+    {
+        private readonly IJwtTokenGenerator _jwtTokenGenerator;
+        private readonly IUserRepository _userRepository;
+        private readonly IDateTimeProvider _dateTimeProvider;
+        public RegisterCommandHandler(
+            IJwtTokenGenerator jwtTokenGenerator,
+            IUserRepository userRepository,
+            IDateTimeProvider dateTimeProvider)
+        {
+            _jwtTokenGenerator = jwtTokenGenerator;
+            _userRepository = userRepository;
+            _dateTimeProvider = dateTimeProvider;
+        }
+
+        public async Task<ErrorOr<AuthenticationResult>> Handle(RegisterCommand command, CancellationToken cancellationToken)
+        {
+            await Task.CompletedTask;
+
+            // 1. validate the user doesn't exist
+            if (_userRepository.GetUserByEmail(command.Email) is not null)
+            {
+                return Errors.User.DuplicateEmail;
+            }
+
+            // 2. Create user ( generate unique ID)  & persist to DB
+            var user = User.Create(
+                   command.FirstName,
+                   command.LastName,
+                   command.Email,
+                   command.Password,
+                   _dateTimeProvider.UtcNow,
+                   _dateTimeProvider.UtcNow);
+
+            _userRepository.Add(user);
+
+            // Create JWT token
+            var token = _jwtTokenGenerator.GenerateToken(user);
+
+            return new AuthenticationResult(
+                user,
+                token);
+
+        }
+    }
+}

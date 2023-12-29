@@ -1,0 +1,20 @@
+{
+  "$schema": "https://raw.githubusercontent.com/DotNetAnalyzers/StyleCopAnalyzers/master/StyleCop.Analyzers/StyleCop.Analyzers/Settings/stylecop.schema.json",
+  "settings": {
+    "documentationRules": {
+      "companyName": "Encrypted Mind",
+      "copyrightText": "Copyright © Encrypted Mind"
+    },
+    "namingRules": {
+      "allowCommonHungarianPrefixes": false
+    },
+    "orderingRules": {
+      "usingDirectivesPlacement": "outsideNamespace"
+    },
+    "maintainabilityRules": {
+    }
+  },
+  "excludedFiles": [
+    "GlobalSuppressions.cs"
+  ]
+}
